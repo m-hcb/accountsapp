@@ -28,7 +28,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/payments', 'PaymentController@index')->name('payments');    
     Route::get('/payment/create', 'PaymentController@create')->name('create-payment');
     Route::post('/payment/save', 'PaymentController@store')->name('save-payment');
-    Route::post('/payment/{id}/download', 'PaymentController@download')->name('download');
+    Route::get('/payment/{id}/download', 'PaymentController@download')->name('download');
     
 });
 

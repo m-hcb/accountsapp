@@ -6,6 +6,7 @@ use App\Models\Account;
 use App\Models\Payment;
 use Illuminate\Http\Request;
 use NumberFormatter;
+use Intervention\Image\Facades\Image;
 
 class PaymentController extends Controller
 {
@@ -122,5 +123,78 @@ class PaymentController extends Controller
         }
         // else there is no serial entry yet
         return $account->serial_start;
+    }
+
+    public function download(Request $request, $id)
+    {
+        $payment = Payment::findOrFail($id);
+
+        $img = Image::make(public_path($payment->account->cheque_image));
+        
+        // add text from database 
+        $img->text($payment->serial, 1050, 155, function($font) {
+            $font->file(public_path('fonts/OpenSans-Regular.ttf'));
+            $font->size(21);
+            $font->color('#000000');
+        });
+
+        $img->text($payment->payee_name, 100, 275, function($font) {
+            $font->file(public_path('fonts/OpenSans-Regular.ttf'));
+            $font->size(21);
+            $font->color('#000000');
+        });
+
+        $img->text($payment->amount_in_words, 110, 315, function($font) {
+            $font->file(public_path('fonts/OpenSans-Regular.ttf'));
+            $font->size(21);
+            $font->color('#000000');
+        });
+
+        $img->text($payment->account->iban, 110, 408, function($font) {
+            $font->file(public_path('fonts/OpenSans-Regular.ttf'));
+            $font->size(25);
+            $font->color('#000000');
+        });
+
+        $img->text($payment->account->title, 34, 438, function($font) {
+            $font->file(public_path('fonts/OpenSans-Regular.ttf'));
+            $font->size(23);
+            $font->color('#000000');
+        });
+
+        $img->text(implode("   ", str_split($payment->created_at->format('dmY'))), 995, 230, function($font) {
+            $font->file(public_path('fonts/OpenSans-Regular.ttf'));
+            $font->size(23);
+            $font->color('#000000');
+        });
+
+        $img->text($payment->amount."/-", 1050, 330, function($font) {
+            $font->file(public_path('fonts/OpenSans-Regular.ttf'));
+            $font->size(21);
+            $font->color('#000000');
+        });
+
+        $sign = Image::make(public_path($payment->account->signature_image));
+        $sign = $sign->resize(null, 50, function ($constraint) {
+            $constraint->aspectRatio();
+        });
+        $img->insert($sign, 'bottom-right', 150, 150);
+
+        $img->save(public_path('image/demo-new.png')); 
+        
+        // dd('Watermark create successfully.');
+
+        $name = 'cheque.jpg';
+
+        $image = $img->encode('jpg');
+        $headers = [
+            'Content-Type' => 'image/jpeg',
+            'Content-Disposition' => 'attachment; filename='. $name,
+        ];
+        return response()->stream(function() use ($image) {
+            echo $image;
+        }, 200, $headers);
+        
+        return $img->response('png');
     }
 }
