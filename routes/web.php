@@ -24,6 +24,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/accounts', 'AccountController@index')->name('accounts');    
     Route::get('/account/create', 'AccountController@create')->name('create-account');
     Route::post('/account/save', 'AccountController@store')->name('save-account');
+
+    Route::get('/payments', 'PaymentController@index')->name('payments');    
+    Route::get('/payment/create', 'PaymentController@create')->name('create-payment');
+    Route::post('/payment/save', 'PaymentController@store')->name('save-payment');
+    Route::post('/payment/{id}/download', 'PaymentController@download')->name('download');
     
 });
 

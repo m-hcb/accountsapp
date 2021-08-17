@@ -43,8 +43,8 @@ class AccountController extends Controller
             'title' => 'required',
             'iban' => 'required',
             'bank_name' => 'required',
-            'serial_start' => 'required',
-            'serial_end' => 'required',
+            'serial_start' => 'required_with:serial_end|integer',
+            'serial_end' => 'required_with:serial_start|integer|gt:serial_start',
             'cheque_image' => 'required|image|mimes:jpeg,png,jpg',
             'signature_image' => 'required|image|mimes:jpeg,png,jpg',
         ]);
